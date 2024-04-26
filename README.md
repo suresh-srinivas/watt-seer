@@ -22,8 +22,7 @@ pip install pandas matplotlib
 ## Usage
 Run the script using Python from the command line:
 
-```
-bash
+```bash
 python energy-use.py 
 ```
 This will generate PNG images for the daily, weekly, and monthly energy consumption visualizations based on the provided data.
@@ -31,17 +30,20 @@ This will generate PNG images for the daily, weekly, and monthly energy consumpt
 ## Data Format
 The energy data should be in a tab-delimited file with the following columns:
 
-start_time: The starting time of the measurement (includes date and time).
-end_time: The ending time of the measurement (includes date and time).
-consumption: The amount of energy consumed in kWh.
+- start_time: The starting time of the measurement (includes date and time).
+- end_time: The ending time of the measurement (includes date and time).
+- consumption: The amount of energy consumed in kWh.
+- provided_cost: The cost of energy consumed in USD.
+
 The start_time and end_time fields should be formatted to include timezone information, which will be converted to UTC and localized to remove timezone awareness within the script.
 
 ## Output
 The script outputs several PNG files:
 
-Daily_Energy_Consumption.png: Shows daily energy consumption.
-Weekly_Energy_Consumption.png: (Optional) For weekly energy consumption visualization.
-Monthly_Energy_Consumption.png: (Optional) For monthly energy consumption visualization.
+- Daily_Energy_Consumption.png: Shows daily energy consumption.
+- Weekly_Energy_Consumption.png: (Optional) For weekly energy consumption visualization.
+- Monthly_Energy_Consumption.png: (Optional) For monthly energy consumption visualization.
+
 Each plot provides a visual representation of energy consumption patterns, assisting in trend analysis and decision-making processes.
 
 ## Contributing

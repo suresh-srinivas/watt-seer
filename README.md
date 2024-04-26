@@ -15,7 +15,8 @@ This repository contains scripts for analyzing energy consumption data on an hou
 To install the required Python libraries, you can use the following command:
 
 ```bash
-pip install pandas matplotlib```
+pip install pandas matplotlib
+```
 
 
 ## Usage
@@ -23,7 +24,8 @@ Run the script using Python from the command line:
 
 ```
 bash
-python energy-use.py ```
+python energy-use.py 
+```
 This will generate PNG images for the daily, weekly, and monthly energy consumption visualizations based on the provided data.
 
 ## Data Format

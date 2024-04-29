@@ -37,3 +37,7 @@ Feel free to contribute to this project by submitting issues or pull requests.
 ## License
 
 This project is open-sourced under the MIT license.
+
+## Example Dashboard
+
+![Dashboard Screenshot](images/dashboard_screenshot.png "Dashboard Screenshot")

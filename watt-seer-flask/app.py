@@ -1,18 +1,42 @@
-
-from flask import Flask, render_template, request, jsonify
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+import plotly.express as px
 import data_fetcher
 
-app = Flask(__name__)
+# Load the data
+energy_data = data_fetcher.load_data('data/energy1.dat')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+app = dash.Dash(__name__)
 
-@app.route('/fetch-data', methods=['POST'])
-def fetch_data():
-    utility_name = request.form.get('utility_name', 'PortlandGeneral')
-    data = data_fetcher.get_data(utility_name)
-    return jsonify(data)
+daily_data = data_fetcher.resample_energy_data(energy_data, 'D')
+weekly_data = data_fetcher.resample_energy_data(energy_data, 'W')
+monthly_data = data_fetcher.resample_energy_data(energy_data, 'M')
+
+daily_figure = px.line(daily_data, x=daily_data.index, y='consumption', title='Daily Energy Consumption', 
+                       labels={
+                           'date': 'Date',
+                           'consumption': 'Energy Consumption (kWh)'
+                       })
+weekly_figure = px.line(weekly_data, x=weekly_data.index, y='consumption', title='Weekly Energy Consumption',
+                       labels={
+                           'date': 'Date',
+                           'consumption': 'Energy Consumption (kWh)'
+                       })
+monthly_figure = px.line(monthly_data, x=monthly_data.index, y='consumption', title='Monthly Energy Consumption',
+                       labels={
+                           'date': 'Date',
+                           'consumption': 'Energy Consumption (kWh)'
+                       })
+
+app.layout = html.Div([
+    html.H1("Energy Data Dashboard"),
+    dcc.Graph(figure=daily_figure),
+    dcc.Graph(figure=weekly_figure),
+    dcc.Graph(figure=monthly_figure)
+])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run_server(debug=True)
+
+

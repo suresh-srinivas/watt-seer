@@ -14,7 +14,9 @@ server = app.server  # Get the Flask server instance
 
 daily_data = data_fetcher.resample_energy_data(energy_data, 'D')
 weekly_data = data_fetcher.resample_energy_data(energy_data, 'W')
-monthly_data = data_fetcher.resample_energy_data(energy_data, 'M')
+monthly_data = data_fetcher.resample_energy_data(energy_data, 'ME')
+quarterly_data = data_fetcher.resample_energy_data(energy_data, 'QE')
+yearly_data = data_fetcher.resample_energy_data(energy_data, 'YE')
 
 daily_figure = px.line(daily_data, x=daily_data.index, y='consumption', title='Daily Energy Consumption', 
                        labels={
@@ -31,12 +33,24 @@ monthly_figure = px.line(monthly_data, x=monthly_data.index, y='consumption', ti
                            'date': 'Date',
                            'consumption': 'Energy Consumption (kWh)'
                        })
-
+quarterly_figure = px.line(quarterly_data, x=quarterly_data.index, y='consumption', title='Quarterly Energy Consumption',
+                       labels={
+                           'date': 'Date',
+                           'consumption': 'Energy Consumption (kWh)'
+                       })
+yearly_figure = px.line(yearly_data, x=yearly_data.index, y='consumption', title='Yearly Energy Consumption',
+                       labels={
+                           'date': 'Date',
+                           'consumption': 'Energy Consumption (kWh)'
+                       })
 app.layout = html.Div([
     html.H1("Energy Data Dashboard"),
     dcc.Graph(figure=daily_figure),
     dcc.Graph(figure=weekly_figure),
-    dcc.Graph(figure=monthly_figure)
+    dcc.Graph(figure=monthly_figure),
+	dcc.Graph(figure=quarterly_figure),
+    dcc.Graph(figure=yearly_figure)
+
 ])
 
 # Endpoint to get daily energy consumption

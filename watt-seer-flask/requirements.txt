@@ -1,0 +1,8 @@
+pandas>=1.5.0
+# Install opower directly from GitHub repository
+git+https://github.com/tronikos/opower.git#egg=opower
+python-dateutil>=2.8.2
+pytz>=2023.3
+dash>=2.9.0
+plotly>=5.13.0
+flask>=2.0.0 

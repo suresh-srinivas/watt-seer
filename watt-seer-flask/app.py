@@ -29,11 +29,7 @@ GITHUB_CREDENTIALS = {
 }
 
 # Development credentials (DO NOT COMMIT)
-DEV_CREDENTIALS = {
-    'username': 'bindumalini@yahoo.com',
-    'password': 'Shakthi123$',
-    'utility': 'portlandgeneral'
-}
+DEV_CREDENTIALS = GITHUB_CREDENTIALS
 
 # Set active credentials
 CREDENTIALS = DEV_CREDENTIALS if USE_DEV_CREDENTIALS else GITHUB_CREDENTIALS

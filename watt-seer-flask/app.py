@@ -2,7 +2,7 @@ import dash
 from dash import html, dcc
 import plotly.express as px
 import data_fetcher
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session
 from datetime import datetime, date, timedelta
 import pytz
 import pandas as pd
@@ -10,13 +10,107 @@ from dateutil.relativedelta import relativedelta
 from dash.exceptions import PreventUpdate
 import logging
 import argparse
+from functools import wraps
+import os
+
+# Define supported utilities
+SUPPORTED_UTILITIES = {
+    'portlandgeneral': 'Portland General',
+    'pacificpower': 'Pacific Power'
+}
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-app = dash.Dash(__name__)
-server = app.server  # Get the Flask server instance
+# Create Flask server first
+server = Flask(__name__, 
+              template_folder='templates')  # Changed to relative path
+
+# Set secret key for session management
+server.secret_key = 'your-secret-key-here'  # Change this to a secure secret key in production
+
+# Initialize Dash with the Flask server
+app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
+
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user' not in session:
+            logger.debug('User not in session, redirecting to login')
+            return redirect(url_for('login'))
+        logger.debug('User in session, proceeding to dashboard')
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Login route
+@server.route('/login', methods=['GET', 'POST'])
+def login():
+    logger.debug('Login route accessed')
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        utility = request.form.get('utility')
+        
+        logger.debug(f'Login attempt - Username: {username}, Utility: {utility}')
+        
+        try:
+            # Try to fetch data with the provided credentials
+            test_credentials = {
+                'username': username,
+                'password': password,
+                'utility': utility
+            }
+            # Try to fetch current month data to validate credentials
+            data_fetcher.get_current_month_data(test_credentials)
+            
+            # If successful, update the CREDENTIALS
+            CREDENTIALS.update(test_credentials)
+            
+            # Store user info in session
+            session['user'] = username
+            session['utility'] = utility
+            logger.debug('Login successful, redirecting to dashboard')
+            return redirect(url_for('dashboard'))
+            
+        except Exception as e:
+            logger.debug(f'Login failed - {str(e)}')
+            return render_template('login.html', error='Invalid credentials', utilities=SUPPORTED_UTILITIES)
+    
+    logger.debug('Rendering login template')
+    return render_template('login.html', utilities=SUPPORTED_UTILITIES)
+
+# Logout route
+@server.route('/logout')
+def logout():
+    logger.debug('Logout route accessed')
+    session.pop('user', None)
+    session.pop('utility', None)
+    return redirect(url_for('login'))
+
+# Root route redirects to login
+@server.route('/')
+def index():
+    logger.debug('Root route accessed, redirecting to login')
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return redirect(url_for('dashboard'))
+
+# Dashboard route
+@server.route('/dashboard')
+@login_required
+def dashboard():
+    logger.debug('Dashboard route accessed')
+    return app.index()
+
+# Protect all Dash routes
+@server.before_request
+def protect_dash_routes():
+    if request.path.startswith('/_dash') or request.path.startswith('/assets'):
+        if 'user' not in session:
+            logger.debug('Unauthorized access to Dash route, redirecting to login')
+            return redirect(url_for('login'))
 
 # Credentials configuration
 USE_DEV_CREDENTIALS = False  # Set to False before committing to GitHub
@@ -51,7 +145,12 @@ available_months = [
 ]
 
 app.layout = html.Div([
-    html.H1("Energy Data Dashboard", style={'textAlign': 'center', 'marginBottom': '20px'}),
+    html.Div([
+        html.H1("Energy Data Dashboard", style={'textAlign': 'center', 'marginBottom': '20px'}),
+        html.Div([
+            html.A('Logout', href='/logout', style={'float': 'right', 'marginRight': '20px', 'color': 'red'})
+        ])
+    ]),
     
     # Year and Month selectors
     html.Div([
@@ -463,6 +562,6 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=8050)
     args = parser.parse_args()
     
-    app.run(debug=True, port=args.port)
+    app.run(debug=True, port=args.port, use_reloader=False)
 
 
